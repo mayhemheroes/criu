@@ -1,5 +1,9 @@
 project: rnshah9/criu
 target: criu
+image: ghcr.io/rnshah9/playground:criu
+tests:
+  - file://as
 
 cmds:
   - cmd: /criu/compel/compel-host-bin -f @@ -o out hgen
+  - cmd: /criu/compel/compel-host-bin -f @@ -o out -l 1 hgen
