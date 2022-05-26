@@ -7,3 +7,4 @@ tests:
 cmds:
   - cmd: /criu/compel/compel-host-bin -f @@ -o out hgen
   - cmd: /criu/compel/compel-host-bin -f @@ -o out -l 1 hgen
+  - cmd: /criu/compel/compel-host-bin -f @@ -o out -p pre hgen
