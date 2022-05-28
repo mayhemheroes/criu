@@ -1,6 +1,5 @@
 project: rnshah9/criu
-target: criu
-image: ghcr.io/rnshah9/playground:criu
+target: compel-host-bin
 tests:
   - file://as
 
