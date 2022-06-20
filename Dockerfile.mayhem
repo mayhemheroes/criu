@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine as builder
 ARG CC=gcc
 
 RUN apk update && apk add \
@@ -45,3 +45,12 @@ RUN pip3 install junit_xml
 # For zdtm we need an unversioned python binary
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+
+RUN mkdir -p /deps
+RUN ldd /criu/compel/compel-host-bin | tr -s '[:blank:]' '\n' | grep '^/' | xargs -I % sh -c 'cp % /deps;'
+
+FROM alpine as package
+
+COPY --from=builder /deps /deps
+COPY --from=builder /criu/compel/compel-host-bin /criu/compel/compel-host-bin
+ENV LD_LIBRARY_PATH=/deps
