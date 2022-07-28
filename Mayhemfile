@@ -4,4 +4,4 @@ testsuite:
   - file://as
 
 cmds:
-  - cmd: /criu/compel/compel-host-bin -f @@ -o out -p pre hgen
+  - cmd: /compel-host-bin -f @@ -o out -p pre hgen
