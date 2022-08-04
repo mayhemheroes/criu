@@ -620,17 +620,16 @@ static int handle_vma(pid_t pid, struct vma_area *vma_area, const char *file_pat
 			pr_info("path: %s\n", file_path);
 			vma_area->e->status |= VMA_AREA_SYSVIPC;
 		} else {
-			/* Dump shmem dev, hugetlb dev (private and share) mappings the same way as memfd
-			 * when possible.
+			/* We dump memfd backed mapping, both normal and hugepage anonymous share
+			 * mapping using memfd approach when possible.
 			 */
 			if (is_memfd(st_buf->st_dev) || is_anon_shmem_map(st_buf->st_dev) ||
-			    (kdat.has_memfd_hugetlb && is_hugetlb_dev(st_buf->st_dev, &hugetlb_flag))) {
+			    can_dump_with_memfd_hugetlb(st_buf->st_dev, &hugetlb_flag, file_path, vma_area)) {
 				vma_area->e->status |= VMA_AREA_MEMFD;
 				vma_area->e->flags |= hugetlb_flag;
 				if (fault_injected(FI_HUGE_ANON_SHMEM_ID))
 					vma_area->e->shmid += FI_HUGE_ANON_SHMEM_ID_BASE;
 			} else if (is_hugetlb_dev(st_buf->st_dev, &hugetlb_flag)) {
-				/* hugetlb mapping but memfd does not support HUGETLB */
 				vma_area->e->flags |= hugetlb_flag;
 				vma_area->e->flags |= MAP_ANONYMOUS;
 
@@ -1028,12 +1027,13 @@ int parse_pid_status(pid_t pid, struct seize_task_status *ss, void *data)
 
 	cr->s.sigpnd = 0;
 	cr->s.shdpnd = 0;
+	cr->s.sigblk = 0;
 	cr->s.seccomp_mode = SECCOMP_MODE_DISABLED;
 
 	if (bfdopenr(&f))
 		return -1;
 
-	while (done < 13) {
+	while (done < 14) {
 		str = breadline(&f);
 		if (str == NULL)
 			break;
@@ -1147,10 +1147,20 @@ int parse_pid_status(pid_t pid, struct seize_task_status *ss, void *data)
 			done++;
 			continue;
 		}
+		if (!strncmp(str, "SigBlk:", 7)) {
+			unsigned long long sigblk = 0;
+
+			if (sscanf(str + 7, "%llx", &sigblk) != 1)
+				goto err_parse;
+			cr->s.sigblk |= sigblk;
+
+			done++;
+			continue;
+		}
 	}
 
 	/* seccomp and nspids are optional */
-	expected_done = (parsed_seccomp ? 11 : 10);
+	expected_done = (parsed_seccomp ? 12 : 11);
 	if (kdat.has_nspid)
 		expected_done++;
 	if (done == expected_done)

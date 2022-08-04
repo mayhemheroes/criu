@@ -184,6 +184,8 @@ TST_NOFILE	:=				\
 		stopped01			\
 		stopped02			\
 		stopped12			\
+		stopped03			\
+		stopped04			\
 		rtc				\
 		clean_mntns			\
 		mntns_rw_ro_rw			\
@@ -199,6 +201,7 @@ TST_NOFILE	:=				\
 		scm04				\
 		scm05				\
 		scm06				\
+		scm09				\
 		aio00				\
 		aio01				\
 		fd				\
@@ -303,6 +306,8 @@ TST_FILE	=				\
 		ghost_holes00			\
 		ghost_holes01			\
 		ghost_holes02			\
+		ghost_holes_large00     \
+		ghost_holes_large01     \
 		unlink_largefile		\
 		mtime_mmap			\
 		fifo				\
@@ -402,10 +407,12 @@ TST_DIR		=				\
 		mnt_ext_master			\
 		mnt_ext_dev			\
 		mnt_ext_root			\
+		mnt_root_ext			\
 		mnt_ext_collision		\
 		mntns_pivot_root		\
 		mntns_pivot_root_ro		\
 		mnt_ext_sharing			\
+		mnt_ext_multiple		\
 		mount_complex_sharing		\
 		mnt_tracefs			\
 		mntns_deleted			\
@@ -591,6 +598,7 @@ vdso01:			LDLIBS += -lrt
 scm01:			CFLAGS += -DKEEP_SENT_FD
 scm02:			CFLAGS += -DSEND_BOTH
 scm04:			CFLAGS += -DSEPARATE
+scm09:			CFLAGS += -DCLOSE_SENDER_FD
 mntns_link_remap:	CFLAGS += -DZDTM_LINK_REMAP
 mntns_shared_bind02:	CFLAGS += -DSHARED_BIND02
 mntns_root_bind02:	CFLAGS += -DROOT_BIND02
@@ -603,6 +611,7 @@ unlink_fstat04:		CFLAGS += -DUNLINK_FSTAT04
 unlink_fstat041:		CFLAGS += -DUNLINK_FSTAT041 -DUNLINK_FSTAT04
 ghost_holes01:		CFLAGS += -DTAIL_HOLE
 ghost_holes02:		CFLAGS += -DHEAD_HOLE
+ghost_holes_large01:		CFLAGS += -DLIMIT
 sk-freebind-false:	CFLAGS += -DZDTM_FREEBIND_FALSE
 selinux02:		CFLAGS += -DUSING_SOCKCREATE
 stopped01:		CFLAGS += -DZDTM_STOPPED_KILL

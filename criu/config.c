@@ -696,6 +696,7 @@ int parse_options(int argc, char **argv, bool *usage_error, bool *has_exec_cmd, 
 		{ "cgroup-yard", required_argument, 0, 1096 },
 		{ "pre-dump-mode", required_argument, 0, 1097 },
 		{ "file-validation", required_argument, 0, 1098 },
+		BOOL_OPT("skip-file-rwx-check", &opts.skip_file_rwx_check),
 		{ "lsm-mount-context", required_argument, 0, 1099 },
 		{ "network-lock", required_argument, 0, 1100 },
 		BOOL_OPT("mntns-compat-mode", &opts.mntns_compat_mode),
@@ -1113,6 +1114,11 @@ int check_options(void)
 			pr_debug("Mount engine fallback to --mntns-compat-mode mode\n");
 			opts.mntns_compat_mode = true;
 		}
+	}
+
+	if (opts.track_mem && !kdat.has_dirty_track) {
+		pr_err("Tracking memory is not available. Consider omitting --track-mem option.\n");
+		return 1;
 	}
 
 	if (check_namespace_opts()) {

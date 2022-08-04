@@ -29,6 +29,7 @@
  * and checked.
  */
 #define BUILD_ID_MAP_SIZE 1048576
+#define ST_UNIT		  512
 
 #include "cr_options.h"
 #include "imgset.h"
@@ -946,8 +947,8 @@ static int dump_ghost_remap(char *path, const struct stat *st, int lfd, u32 id, 
 
 	pr_info("Dumping ghost file for fd %d id %#x\n", lfd, id);
 
-	if (st->st_size > opts.ghost_limit) {
-		pr_err("Can't dump ghost file %s of %" PRIu64 " size, increase limit\n", path, st->st_size);
+	if (st->st_blocks * ST_UNIT > opts.ghost_limit) {
+		pr_err("Can't dump ghost file %s of %" PRIu64 " size, increase limit\n", path, st->st_blocks * ST_UNIT);
 		return -1;
 	}
 
@@ -2199,9 +2200,21 @@ ext:
 		if (!validate_file(tmp, &st, rfi))
 			goto err;
 
-		if (rfi->rfe->has_mode && (st.st_mode != rfi->rfe->mode)) {
-			pr_err("File %s has bad mode 0%o (expect 0%o)\n", rfi->path, (int)st.st_mode, rfi->rfe->mode);
-			goto err;
+		if (rfi->rfe->has_mode) {
+			mode_t curr_mode = st.st_mode;
+			mode_t saved_mode = rfi->rfe->mode;
+
+			if (opts.skip_file_rwx_check) {
+				curr_mode &= ~(S_IRWXU | S_IRWXG | S_IRWXO);
+				saved_mode &= ~(S_IRWXU | S_IRWXG | S_IRWXO);
+			}
+
+			if (curr_mode != saved_mode) {
+				pr_err("File %s has bad mode 0%o (expect 0%o)\n"
+				       "File r/w/x checks can be skipped with the --skip-file-rwx-check option\n",
+				       rfi->path, (int)curr_mode, saved_mode);
+				goto err;
+			}
 		}
 
 		/*
