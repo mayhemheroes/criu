@@ -1,6 +1,6 @@
 project: criu
-target: compel-host-bin
+target: criu-set-parent-images
 
 cmds:
-  - cmd: /compel-host-bin -f @@ -o out -p pre hgen
+  - cmd: /fuzz_criu_set_parent_images
     libfuzzer: true
