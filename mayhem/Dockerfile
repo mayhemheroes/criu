@@ -1,10 +1,11 @@
-FROM alpine as builder
+FROM ubuntu:22.04 as builder
 ARG CC=gcc
 
-RUN apk update && apk add \
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
 	$CC \
 	bash \
-	build-base \
+	build-essential \
 	coreutils \
 	procps \
 	git \
@@ -12,38 +13,17 @@ RUN apk update && apk add \
 	libaio-dev \
 	libcap-dev \
 	libnet-dev \
-	libnl3-dev \
-	nftables \
-	nftables-dev \
-	pkgconfig \
-	protobuf-c-dev \
-	protobuf-dev \
-	py3-pip \
-	py3-protobuf \
+	pkg-config \
 	python3 \
-	sudo
-
+	sudo \
+	clang libprotobuf-dev libprotobuf-c-dev protobuf-c-compiler protobuf-compiler python3-protobuf python3-future libnl-3-dev libcap-dev
 COPY . /criu
 WORKDIR /criu
 RUN make mrproper && date && make -j $(nproc) CC="$CC" && date
+RUN clang++ /criu/mayhem/fuzz_criu_set_parent_images.cpp -fsanitize=fuzzer,address /criu/lib/c/libcriu.a -lprotobuf-c -o /fuzz
 
-RUN apk add \
-	ip6tables \
-	iptables \
-	nftables \
-	iproute2 \
-	tar \
-	bash \
-	go \
-	e2fsprogs \
-	py-yaml \
-	py3-flake8 \
-	asciidoctor
-
-RUN pip3 install junit_xml
-
-# For zdtm we need an unversioned python binary
-RUN ln -s /usr/bin/python3 /usr/bin/python
-
-FROM alpine as package
+FROM ubuntu:22.04 as package
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libprotobuf-c-dev
 COPY --from=builder /criu/compel/compel-host-bin /
+COPY --from=builder /fuzz /fuzz_criu_set_parent_images

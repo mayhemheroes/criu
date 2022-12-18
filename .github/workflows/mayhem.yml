@@ -59,7 +59,8 @@ jobs:
       fail-fast: false
       matrix:
         mayhemfile:
-          - mayhem/Mayhemfile
+          - mayhem/Mayhemfile_criu_set_parent_images
+          - mayhem/Mayhemfile_compel-host-bin
 
     steps:
       - uses: actions/checkout@v3

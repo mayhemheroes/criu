@@ -1,0 +1,6 @@
+project: criu
+target: compel-host-bin
+
+cmds:
+  - cmd: /compel-host-bin -f @@ -o out -p pre hgen
+    libfuzzer: true
