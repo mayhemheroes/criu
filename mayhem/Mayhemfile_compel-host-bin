@@ -1,0 +1,7 @@
+project: criu
+target: compel-host-bin
+testsuite:
+  - file://as
+
+cmds:
+  - cmd: /compel-host-bin -f @@ -o out -p pre hgen

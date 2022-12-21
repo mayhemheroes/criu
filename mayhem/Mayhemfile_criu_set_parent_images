@@ -1,0 +1,6 @@
+project: criu
+target: criu-set-parent-images
+
+cmds:
+  - cmd: /fuzz_criu_set_parent_images
+    libfuzzer: true
